@@ -8,7 +8,8 @@ import rehypeRaw from "rehype-raw";
 import uuid from 'react-uuid';
 
 import styles from "./Chat.module.css";
-import Azure from "../../assets/Azure.svg";
+//import Azure from "../../assets/Azure.svg";
+import Azure from "../../assets/FirstReserve.svg";
 
 import {
     ChatMessage,
@@ -545,7 +546,8 @@ const Chat = () => {
                                     aria-hidden="true"
                                 />
                                 <h1 className={styles.chatEmptyStateTitle}>Start chatting</h1>
-                                <h2 className={styles.chatEmptyStateSubtitle}>This chatbot is configured to answer your questions</h2>
+                                <h2 className={styles.chatEmptyStateSubtitle}>This secured chatbot is configured to answer your questions.<br/>
+                                    Your chat outcomes and history will be privately stored on First Reserve servers and will not be visible to anyone except you.</h2>
                             </Stack>
                         ) : (
                             <div className={styles.chatMessageStream} style={{ marginBottom: isLoading ? "40px" : "0px"}} role="log">
