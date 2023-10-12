@@ -260,7 +260,7 @@
         },
         "WebAppEnableChatHistory": {
             "type": "bool",
-            "defaultValue": false,
+            "defaultValue": true,
             "metadata": {
                 "description": "Enable chat history by deploying a Cosmos DB instance"
             }

@@ -21,18 +21,23 @@ param searchIndexName string = 'gptkbindex'
 param searchUseSemanticSearch bool = false
 param searchSemanticSearchConfig string = 'default'
 param searchTopK int = 5
-param searchEnableInDomain bool = true
+//param searchEnableInDomain bool = true
+param searchEnableInDomain bool = false
 param searchContentColumns string = 'content'
 param searchFilenameColumn string = 'filepath'
 param searchTitleColumn string = 'title'
 param searchUrlColumn string = 'url'
 
+param cosmosAccountName string = ''
+
 param openAiResourceName string = ''
 param openAiResourceGroupName string = ''
 param openAiResourceGroupLocation string = location
 param openAiSkuName string = ''
-param openAIModel string = 'turbo16k'
-param openAIModelName string = 'gpt-35-turbo-16k'
+// param openAIModel string = 'turbo16k'
+param openAIModel string = 'deploygptv432k'
+// param openAIModelName string = 'gpt-35-turbo-16k'
+param openAIModelName string = 'gpt-4-32k'
 param openAITemperature int = 0
 param openAITopP int = 1
 param openAIMaxTokens int = 1000
@@ -53,9 +58,6 @@ param formRecognizerSkuName string = ''
 param authClientId string
 @secure()
 param authClientSecret string
-
-// Used for Cosmos DB
-param cosmosAccountName string = ''
 
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
@@ -117,6 +119,7 @@ module backend 'core/host/appservice.bicep' = {
     authClientSecret: authClientSecret
     authClientId: authClientId
     authIssuerUri: authIssuerUri
+    //These settings get added to appSettings of the Azure Web App.
     appSettings: {
       // search
       AZURE_SEARCH_INDEX: searchIndexName
@@ -134,7 +137,10 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_OPENAI_RESOURCE: openAi.outputs.name
       AZURE_OPENAI_MODEL: openAIModel
       AZURE_OPENAI_MODEL_NAME: openAIModelName
+      //VM Added OPENAI endpoint from outputs.
+      AZURE_OPENAI_ENDPOINT: openAi.outputs.endpoint
       AZURE_OPENAI_KEY: openAi.outputs.key
+      AZURE_OPENAI_EMBEDDING_KEY: openAi.outputs.key
       AZURE_OPENAI_TEMPERATURE: openAITemperature
       AZURE_OPENAI_TOP_P: openAITopP
       AZURE_OPENAI_MAX_TOKENS: openAIMaxTokens
@@ -142,6 +148,11 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_OPENAI_SYSTEM_MESSAGE: openAISystemMessage
       AZURE_OPENAI_PREVIEW_API_VERSION: openAIApiVersion
       AZURE_OPENAI_STREAM: openAIStream
+      
+      // // VM Added this: Perhaps this is not needed. CosmosDB Integration Settings
+       AZURE_COSMOSDB_ACCOUNT: cosmos.outputs.accountName
+       AZURE_COSMOSDB_CONVERSATIONS_CONTAINER : cosmos.outputs.containerName
+       AZURE_COSMOSDB_DATABASE: cosmos.outputs.databaseName      
     }
   }
 }
@@ -165,7 +176,8 @@ module openAi 'core/ai/cognitiveservices.bicep' = {
           name: openAIModelName
           version: '0613'
         }
-        capacity: 30
+        // capacity: 30
+        capacity: 2
       }
       {
         name: embeddingDeploymentName
@@ -174,7 +186,8 @@ module openAi 'core/ai/cognitiveservices.bicep' = {
           name: embeddingModelName
           version: '2'
         }
-        capacity: 30
+        // capacity: 30
+        capacity: 2
       }
     ]
   }
@@ -207,7 +220,8 @@ module cosmos 'db.bicep' = {
     accountName: !empty(cosmosAccountName) ? cosmosAccountName : '${abbrs.documentDBDatabaseAccounts}${resourceToken}'
     location: searchServiceResourceGroupLocation
     tags: tags
-    principalIds: [principalId, backend.outputs.identityPrincipalId]
+     //principalIds: [principalId, backend.outputs.identityPrincipalId]
+    principalIds: [principalId]
   }
 }
 
@@ -337,5 +351,4 @@ output AZURE_FORMRECOGNIZER_SKU_NAME string = docPrepResources.outputs.AZURE_FOR
 output AZURE_COSMOSDB_ACCOUNT string = cosmos.outputs.accountName
 output AZURE_COSMOSDB_DATABASE string = cosmos.outputs.databaseName
 output AZURE_COSMOSDB_CONVERSATIONS_CONTAINER string = cosmos.outputs.containerName
-
 output AUTH_ISSUER_URI string = authIssuerUri
