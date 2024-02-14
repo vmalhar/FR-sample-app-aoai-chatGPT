@@ -60,6 +60,8 @@ Run the following commands based on what you want to customize:
 
 If you make any changes to the app code (JS or Python), you can re-deploy the app code to App Service by running the `azd deploy` command.
 
+To set the environment during deploy command run `azd deploy -e prod-openai-chatgpt0` where prod-openai-chatgpt0 is the environment name in .env file
+
 If you change any of the Bicep files in the infra folder, then you should re-run `azd up` to both provision resources and deploy code.
 
 ### Running locally:
